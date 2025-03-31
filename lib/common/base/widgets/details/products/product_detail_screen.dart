@@ -4,8 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:multi_store/common/base/widgets/common/app_button.dart';
 import 'package:multi_store/common/base/widgets/common/image_slider.dart';
+import 'package:multi_store/data/model/favorite.dart';
 import 'package:multi_store/data/model/product.dart';
 import 'package:multi_store/provider/cart_provider.dart';
+import 'package:multi_store/provider/favorite_provider.dart';
 import 'package:multi_store/resource/theme/app_colors.dart';
 import 'package:multi_store/resource/theme/app_style.dart';
 import 'package:multi_store/services/manage_http_response.dart';
@@ -17,6 +19,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({super.key, required this.product});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ProductDetailScreenState createState() => _ProductDetailScreenState();
 }
 
@@ -32,6 +35,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final cartProviderData = ref.read(cartProvider.notifier);
+    final favoriteProviderData = ref.read(favoriteProvider.notifier);
+    ref.watch(favoriteProvider);
     final cartData = ref.watch(cartProvider);
     final isInCart = cartData.containsKey(widget.product.id);
 
@@ -45,15 +50,27 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         actions: [
           IconButton(
             onPressed: () {
+              favoriteProviderData.addProductToFavorite(
+                productId: widget.product.id,
+                productName: widget.product.productName,
+                productPrice: widget.product.productPrice,
+                category: widget.product.category,
+                images: widget.product.images,
+                vendorId: widget.product.vendorId,
+                productQuantity: widget.product.quantity,
+                quantity: 1,
+                description: widget.product.id,
+                fullName: widget.product.fullName,
+              );
+              showSnackBar(context, 'added ${widget.product.productName}');
               setState(() {
                 _isFavorite = !_isFavorite;
               });
             },
-            icon: SvgPicture.asset(
-              _isFavorite ? AppImages.icHeartRed : AppImages.icHeart,
-              width: 28,
-              height: 28,
-            ),
+            icon: favoriteProviderData.getFavortiteItems
+                    .containsKey(widget.product.id)
+                ? SvgPicture.asset(AppImages.icHeartRed, width: 28, height: 28)
+                : SvgPicture.asset(AppImages.icHeart, width: 28, height: 28),
           ),
         ],
       ),
@@ -94,10 +111,10 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                           size: 20,
                         ),
                         const SizedBox(width: 5),
-
                         Text(
                           widget.product.averageRating.toStringAsFixed(1),
-                          style: AppStyles.STYLE_14_BOLD.copyWith(color: AppColors.blackFont),
+                          style: AppStyles.STYLE_14_BOLD
+                              .copyWith(color: AppColors.blackFont),
                         ),
                         const SizedBox(width: 5),
                         Text("(${widget.product.totalRatings})"),
@@ -144,15 +161,28 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           children: [
             IconButton(
               onPressed: () {
+                favoriteProviderData.addProductToFavorite(
+                  productId: widget.product.id,
+                  productName: widget.product.productName,
+                  productPrice: widget.product.productPrice,
+                  category: widget.product.category,
+                  images: widget.product.images,
+                  vendorId: widget.product.vendorId,
+                  productQuantity: widget.product.quantity,
+                  quantity: 1,
+                  description: widget.product.id,
+                  fullName: widget.product.fullName,
+                );
+                showSnackBar(context, 'added ${widget.product.productName}');
                 setState(() {
                   _isFavorite = !_isFavorite;
                 });
               },
-              icon: SvgPicture.asset(
-                _isFavorite ? AppImages.icHeartRed : AppImages.icHeart,
-                width: 28,
-                height: 28,
-              ),
+              icon: favoriteProviderData.getFavortiteItems
+                      .containsKey(widget.product.id)
+                  ? SvgPicture.asset(AppImages.icHeartRed,
+                      width: 28, height: 28)
+                  : SvgPicture.asset(AppImages.icHeart, width: 28, height: 28),
             ),
             const SizedBox(width: 5),
             AppButton(
@@ -181,7 +211,8 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                   description: widget.product.id,
                   fullName: widget.product.fullName,
                 );
-                showSnackBar(context, "${widget.product.productName} đã thêm vào giỏ");
+                showSnackBar(
+                    context, "${widget.product.productName} đã thêm vào giỏ");
               },
               color: isInCart == true ? AppColors.grey : AppColors.bluePrimary,
               textColor: AppColors.white,
