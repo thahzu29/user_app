@@ -125,8 +125,8 @@ class _FavoritePageState extends ConsumerState<FavoritePage> {
                                   ),
                                 ),
                                 Positioned(
-                                  right: 15,
-                                  top: 16,
+                                  right: 13,
+                                  top: 30,
                                   child: Text(
                                     formatCurrency(
                                         wishData.productPrice.toDouble()),
