@@ -1,12 +1,52 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:multi_store/data/model/cart_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-final cartProvider = StateNotifierProvider<CartNotifier,Map<String, Cart>>((ref){
+final cartProvider =
+    StateNotifierProvider<CartNotifier, Map<String, Cart>>((ref) {
   return CartNotifier();
 });
 
 class CartNotifier extends StateNotifier<Map<String, Cart>> {
-  CartNotifier() : super({});
+  CartNotifier() : super({}) {
+    _loadCartItems();
+  }
+
+  // Phương thức riêng tư đển load item từ cart
+  Future<void> _loadCartItems() async {
+    // Lấy sự cart để lưu trữ trong dữ liệu
+    final prefs = await SharedPreferences.getInstance();
+    // Nạp chuỗi Json của các cart từ cart được chia sẽ dưới key cart_items
+    final cartString = prefs.getString('cart_items');
+    // Kiểm tra nếu String không được null , nghĩa là data lưu trữ
+    if (cartString != null) {
+      // Giải mã json String vào Map of dymaic data
+      final Map<String, dynamic> cartMap = jsonDecode(cartString);
+
+      //convert the dynamic map into map of cart objsect using fromjson factory method
+      final cartItems = cartMap.map((key, value) {
+        final cartData = value is String ? jsonDecode(value) : value;
+        return MapEntry(key, Cart.fromJson(cartData));
+      });
+
+      //updaing the state with the loaded favorites
+      state = cartItems;
+    }
+  }
+
+  // Phương thức riêng tư để lưu danh sách cart
+  Future<void> _saveCartItems() async {
+    // Lấy cart để lưu trữ trong dữ liệu
+    final prefs = await SharedPreferences.getInstance();
+    // Mã hoá trạng thái hiện tại (Map of favorite object) into json String
+    final cartString = jsonEncode(
+      state.map((key, value) => MapEntry(key, value.toMap())),
+    );
+    //saving the json string đến carrt được chia sẽ với the key "cart"
+    await prefs.setString('cart_items', cartString);
+  }
 
   // Ham them san pham vao gio hang
   void addProductToCart({
@@ -38,6 +78,7 @@ class CartNotifier extends StateNotifier<Map<String, Cart>> {
           fullName: state[productId]!.fullName,
         ),
       };
+      _saveCartItems();
     } else {
       // Neu san pham chua co trong gio hang, them moi
       state = {
@@ -55,6 +96,7 @@ class CartNotifier extends StateNotifier<Map<String, Cart>> {
           fullName: fullName,
         ),
       };
+      _saveCartItems();
     }
   }
 
@@ -65,6 +107,7 @@ class CartNotifier extends StateNotifier<Map<String, Cart>> {
 
       // Trang thai sau thay doi
       state = {...state};
+      _saveCartItems();
     }
   }
 
@@ -75,6 +118,7 @@ class CartNotifier extends StateNotifier<Map<String, Cart>> {
 
       // trang thai sau thay doi
       state = {...state};
+      _saveCartItems();
     }
   }
 
@@ -83,6 +127,7 @@ class CartNotifier extends StateNotifier<Map<String, Cart>> {
     state.remove(productId);
     // trang thai  sau thay doi
     state = {...state};
+    _saveCartItems();
   }
 
   // tinh toan tong gia sau thay doi
@@ -97,7 +142,8 @@ class CartNotifier extends StateNotifier<Map<String, Cart>> {
   Map<String, Cart> get getCartItems => state;
 
   // xoa gio hang
-  void clearCart(){
+  void clearCart() {
     state = {};
+    _saveCartItems();
   }
 }
