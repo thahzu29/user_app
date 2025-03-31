@@ -51,26 +51,29 @@ class ProductItemWidget extends ConsumerWidget {
             const SizedBox(height: 5),
             Text(
               product.productName,
-              style: AppStyles.STYLE_14_BOLD.copyWith(color: AppColors.blackFont),
+              style:
+                  AppStyles.STYLE_14_BOLD.copyWith(color: AppColors.blackFont),
               overflow: TextOverflow.ellipsis,
             ),
             Text(
               formatCurrency(product.productPrice),
-              style: AppStyles.STYLE_12_BOLD.copyWith(color: AppColors.bluePrimary),
+              style: AppStyles.STYLE_12_BOLD
+                  .copyWith(color: AppColors.bluePrimary),
             ),
             product.averageRating == 0
                 ? SizedBox()
                 : Row(
                     children: [
-                    const  Icon(
+                      const Icon(
                         Icons.star,
                         color: Colors.amber,
-                      size: 20,
+                        size: 20,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         product.averageRating.toStringAsFixed(1),
-                        style: AppStyles.STYLE_12_BOLD.copyWith(color: AppColors.blackFont),
+                        style: AppStyles.STYLE_12_BOLD
+                            .copyWith(color: AppColors.blackFont),
                       ),
                     ],
                   ),
